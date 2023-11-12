@@ -12,6 +12,22 @@ app.use("/customer",session({secret:"fingerprint_customer",resave: true, saveUni
 
 app.use("/customer/auth/*", function auth(req,res,next){
 //Write the authenication mechanism here
+const accessToken = req.session.accessToken;
+
+    if (!accessToken) {
+        return res.status(401).json({ message: "Unauthorized - Access Token missing" });
+    }
+
+    // Verify the access token
+    jwt.verify(accessToken, "secret_key", (err, decoded) => {
+        if (err) {
+            return res.status(401).json({ message: "Unauthorized - Invalid Access Token" });
+        }
+
+        // Store user information in the request for later use
+        req.user = decoded;
+        next(); // Allow the request to proceed
+    });
 });
  
 const PORT =5000;
